@@ -1,0 +1,66 @@
+<div>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Nuevos Posts</h4>
+		<button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+	</div>
+	<div class="modal-body">
+		<div class="m-3" [formGroup]="formPost">
+      <div formArrayName="posts">
+        @for (post of formPostsControls; track $index) {
+          
+          <div [formGroupName]="$index">
+          <div class="row mt-2">
+            <div class="col-1">
+              <br>
+              <span>{{ $index + 1 }}</span>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label for="">Titulo</label>
+                <input type="text" formControlName="title" class="form-control" />
+                @if(post.get('title')?.touched && post.get('title')?.invalid){
+                  <small class="text-danger"
+                    >El titulo es requerido</small
+                  >
+                }
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label for="">Contenido</label>
+                <input type="text" formControlName="content" class="form-control" />
+                @if(post.get('content')?.touched && post.get('content')?.invalid){
+                  <small class="text-danger"
+                    >El contenido es requerido</small
+                  >
+                }
+              </div>
+            </div>
+            <div class="col-3">
+              <label for="">Imagen URL</label>
+              <input type="text" formControlName="image" class="form-control" />
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      <button
+        class="btn btn-primary mt-2"
+        (click)="addPost()"
+        [disabled]="!formPost.valid"
+      >
+        Agregar Post
+      </button>
+    </div>
+    
+	</div>
+	<div class="modal-footer">
+		<button
+        class="btn btn-primary mt-2"
+        (click)="addPosts()"
+        [disabled]="!formPost.valid"
+      >
+        Enviar Posts
+      </button>
+	</div>
+</div>

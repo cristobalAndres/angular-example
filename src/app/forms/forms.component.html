@@ -1,0 +1,17 @@
+<div class="container !direction !spacing">
+  <button
+  type="button"
+  class="btn btn-primary mt-4 mb-4"
+  (click)="open()"
+>
+  Crear Post
+</button>
+
+
+<ul class="list-group">
+  @for (photo of photos; track $index) {
+    <li class="list-group-item list-group-item-action" (click)="editData(photo.id)">{{photo.albumId}} - {{photo.title}}</li>
+  }
+</ul>
+</div>
+

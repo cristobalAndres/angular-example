@@ -1,0 +1,54 @@
+<div class="modal-body">
+  <form [formGroup]="formPhoto">
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label">albumId</label>
+      <input
+        type="text"
+        class="form-control"
+        formControlName="albumId"
+        id="exampleFormControlInput1"
+        placeholder=""
+      />
+    </div>
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label">title</label>
+      <input
+        type="text"
+        class="form-control"
+        formControlName="title"
+        id="exampleFormControlInput1"
+        placeholder=""
+      />
+    </div>
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label">Photo url</label>
+      <input
+        type="text"
+        class="form-control"
+        formControlName="url"
+        id="exampleFormControlInput1"
+        placeholder=""
+      />
+    </div>
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label"
+        >thumbnailUrl</label
+      >
+      <input
+        type="text"
+        class="form-control"
+        formControlName="thumbnailUrl"
+        id="exampleFormControlInput1"
+        placeholder=""
+      />
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    Close
+  </button>
+  <button type="button" class="btn btn-primary" (click)="save()">
+    Save changes
+  </button>
