@@ -12,15 +12,17 @@ export class AppService {
 
   getPost() {
     this.loading.set(true);
-    return this.http.get<Post[]>('https://jsonplaceholder.typicode.com/photos').subscribe({
-      next: (data) => {
-        this.loading.set(false);
-        this.post.set(data);
-      },
-      error: (error) => {
-        this.loading.set(false);
-        console.log(error);
-      }
-    });
+    // return this.http.get<Post[]>('https://jsonplaceholder.typicode.com/photos').subscribe({
+    //   next: (data) => {
+    //     this.loading.set(false);
+    //     this.post.set(data);
+    //   },
+    //   error: (error) => {
+    //     this.loading.set(false);
+    //     console.log(error);
+    //   },
+    // });
+
+
   }
 }
