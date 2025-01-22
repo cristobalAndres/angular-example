@@ -32,3 +32,14 @@ $theme-colors: (
 .carousel-inner {
   background-color: $indigo-100 !important;
 }
+
+@font-face {
+  font-family: 'Futura LT';
+  src: url('assets/fonts/FuturaLT.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Futura LT', sans-serif;
+}

@@ -15,7 +15,7 @@ export class FintocComponent {
     const options = {
       holderType: 'individual',
       product: 'movements',
-      publicKey: 'pk_test_ehsQr5uz4KETs5Svy9KiLDXxrDsxKB4D-YHfVsxCEr4',
+      publicKey: 'pk_live_zeTc4uHUSo4yHdxEKkFsY4Jw1CE5KZZn3S4gC9zTxvY',
       webhookUrl: 'https://next-conta-api-dev-b9b6c8ajhjdrcnch.eastus-01.azurewebsites.net/fintoc/webhook',
       country: 'cl',
       // institutionId,

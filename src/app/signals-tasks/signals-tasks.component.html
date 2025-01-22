@@ -1,0 +1,28 @@
+<div class="tareas-container">
+  <h1>Gestión de Tareas</h1>
+  <input #descripcionInput type="text" placeholder="Nueva tarea" />
+  <button
+    (click)="agregarTarea(descripcionInput.value); descripcionInput.value = ''"
+  >
+    Agregar Tarea
+  </button>
+
+  <div class="filtros">
+    <button (click)="cambiarFiltro('todas')">Todas</button>
+    <button (click)="cambiarFiltro('completadas')">Completadas</button>
+    <button (click)="cambiarFiltro('pendientes')">Pendientes</button>
+  </div>
+
+  <ul>
+    @for (tarea of tareasFiltradas(); track $index) {
+    <li>
+      <input
+        type="checkbox"
+        [checked]="tarea.completada"
+        (change)="toggleCompletada(tarea.id)"
+      />
+      <span [class.completada]="tarea.completada">{{ tarea.descripcion }}</span>
+    </li>
+    }
+  </ul>
+</div>

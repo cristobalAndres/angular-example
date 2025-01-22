@@ -1,0 +1,37 @@
+.tareas-container {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+input[type='text'] {
+  padding: 10px;
+  width: 70%;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 5px;
+}
+
+.filtros {
+  margin: 20px 0;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.completada {
+  text-decoration: line-through;
+  color: gray;
+}

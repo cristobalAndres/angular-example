@@ -1,0 +1,27 @@
+<div class="pokedex-container">
+  <h1>Pokédex</h1>
+  <h4>
+    Total: {{ totalPokemonCount() }}
+  </h4>
+  <div class="pokemon-list">
+    <ul>
+      @for (pokemon of pokemonList(); track $index) {
+      <li>
+        <button (click)="selectPokemon(pokemon.name)">
+          {{ pokemon.name | titlecase }}
+        </button>
+      </li>
+      }
+    </ul>
+  </div>
+  @if (pokemonDetail()) {
+    <div class="pokemon-detail">
+      <h2>{{ pokemonDetail()?.name| titlecase }}</h2>
+      <img
+        [src]="pokemonDetail()?.sprites?.front_default"
+        [alt]="pokemonDetail()?.name"
+      />
+      <p>Types: {{ pokemonTypes() }}</p>
+    </div>
+  }
+</div>

@@ -1,0 +1,30 @@
+.pokedex-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.pokemon-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.pokemon-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.pokemon-list li {
+  margin: 5px 0;
+}
+
+.pokemon-detail {
+  text-align: center;
+}
+
+.pokemon-detail img {
+  width: 150px;
+  height: 150px;
+}

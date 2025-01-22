@@ -1,0 +1,54 @@
+
+<table [formGroup]="formPurchase">
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody formArrayName="purchases">
+    @for (item of getFormControls.controls; track $index) {
+      <tr [formGroupName]="$index" [ngClass]="{ 'bacjkground-row': item.get('hola')?.value === true }">
+        <td>
+          <input type="text" formControlName="name" />
+        </td>
+        <td>
+          <input type="text" formControlName="price" (change)="total($index)" />
+        </td>
+        <td>
+          <div formGroupName="bills">
+            @if(item.get('hola')?.value === false) {
+              <input type="text" formControlName="count" (change)="total($index)" />
+            }
+            
+          </div>
+        </td>
+        <td>
+          <div formGroupName="bills">
+            <input type="text" formControlName="total" />
+          </div>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<button
+  type="button"
+  class="btn btn-primary"
+  (click)="addPurchase()"
+>
+  Button
+</button>
+
+<br><br>
+
+<button
+  type="button"
+  class="btn btn-primary"
+  (click)="submit()"
+>
+  Valor
+</button>

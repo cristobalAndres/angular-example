@@ -1,0 +1,66 @@
+.header-small {
+  background: var(--Color, rgba(51, 51, 51, 1));
+  color: white;
+}
+
+.title-section {
+  color: var(--Verde, rgba(0, 99, 83, 1));
+  font-weight: 700;
+}
+
+
+
+.background-section-pyme {
+  background: var(--Color, rgba(51, 51, 51, 1));
+  color: white;
+  position: relative; /* Añadir posición relativa */
+  padding-bottom: 100px; /* Ajusta según la altura de la imagen */
+  overflow: hidden; /* Evita que la imagen sobresalga a otras secciones */
+}
+
+.background-section-pyme::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 300px; /* Ajusta la altura de la imagen */
+  background: url('../assets/images/BACKGROUND_2.svg') no-repeat center bottom;
+  background-size: cover;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+ /* Estilos de los elementos */
+ .feature-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.feature-icon {
+  width: 60px; /* Tamaño del icono */
+  height: auto;
+  margin-right: 20px;
+}
+
+.feature-title {
+  font-weight: bold;
+}
+
+.feature-description {
+  margin: 0;
+  opacity: 0.8; /* Hace que el texto secundario se vea más tenue */
+}
+
+.pc-image-container {
+  text-align: center;
+  margin-bottom: -18%; /* Hace que la imagen suba y entre en la sección anterior */
+  overflow: visible;
+  position: relative;
+  z-index: 2;
+}
+
+.margin-top-25 {
+  margin-top: 25%;
+}

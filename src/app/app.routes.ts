@@ -32,6 +32,22 @@ export const routes: Routes = [
     loadComponent: () => import('./forms/forms.component').then((m) => m.FormsComponent),
   },
   {
+    path: 'code',
+    loadComponent: () => import('./code-test/code-test.component').then((m) => m.CodeTestComponent),
+  },
+  {
+    path: 'signals',
+    loadComponent: () => import('./signals/signals.component').then((m) => m.SignalsComponent),
+  },
+  {
+    path: 'signals-tasks',
+    loadComponent: () => import('./signals-tasks/signals-tasks.component').then((m) => m.SignalsTasksComponent),
+  },
+  {
+    path: 'signals-pokemon',
+    loadComponent: () => import('./signals-pokemon/signals-pokemon.component').then((m) => m.SignalsPokemonComponent),
+  },
+  {
     path: '**',
     redirectTo: '/forms',
     pathMatch: 'full',

@@ -1,0 +1,12 @@
+<div class="contador-container">
+  <h1>Contador Reactivo con Signals</h1>
+  <p>Valor actual: {{ contador() }}</p>
+  <p>El doble del contador es: {{ dobleContador() }}</p>
+  <button type="button" class="btn btn-primary" (click)="incrementar()">
+    Incrementar
+  </button>
+
+  <button type="button" class="btn btn-primary" (click)="decrementar()">
+    Decrementar
+  </button>
+</div>
