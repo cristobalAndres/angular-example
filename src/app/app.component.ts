@@ -11,11 +11,10 @@ import "driver.js/dist/driver.css";
 import { FormsComponent } from "./forms/forms.component";
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, FormArrayComponent, FormsModule, ReactiveFormsModule, HeaderComponent, FormsComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+    selector: 'app-root',
+    imports: [RouterOutlet, FormArrayComponent, FormsModule, ReactiveFormsModule, HeaderComponent, FormsComponent],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent {
   private modalService = inject(NgbModal);

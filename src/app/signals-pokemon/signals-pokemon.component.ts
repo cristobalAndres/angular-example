@@ -5,18 +5,18 @@ import { PokemonDetail, PokemonService } from './services/pokemon.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-signals-pokemon',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './signals-pokemon.component.html',
-  styleUrls: ['./signals-pokemon.component.scss'],
+    selector: 'app-signals-pokemon',
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: './signals-pokemon.component.html',
+    styleUrls: ['./signals-pokemon.component.scss']
 })
 export class SignalsPokemonComponent {
   private readonly pokemonService = inject(PokemonService);
 
   // Signal para la lista de Pokémon
-  pokemonList = signal<{ name: string; url: string }[]>([]);
-  // pokemonList = this.pokemonService.pokemonList;
+  // pokemonList = signal<{ name: string; url: string }[]>([]);
+  pokemonList = this.pokemonService.pokemonList;
 
   // Computed signal for the total number of Pokémon
   totalPokemonCount = computed(() => this.pokemonList().length);
@@ -33,20 +33,11 @@ export class SignalsPokemonComponent {
   private selectedPokemon$ = toObservable(this.selectedPokemon);
 
   // Signal para los detalles del Pokémon seleccionado
-  pokemonDetail = toSignal(
-    this.selectedPokemon$.pipe(
-      switchMap((name) =>
-        name ? this.pokemonService.getPokemonDetail(name) : of(null)
-      )
-    ),
-    { initialValue: null }
-  );
+  pokemonDetail = this.pokemonService.pokemonDetail;
 
   constructor() {
     // Efecto para cargar la lista de Pokémon al inicializar el componente
-    this.pokemonService.getPokemonList().subscribe((response) => {
-      this.pokemonList.set(response.results);
-    });
+    this.pokemonService.getPokemonList();
 
     // this.pokemonService.getPokemonList();
   }
@@ -54,5 +45,6 @@ export class SignalsPokemonComponent {
   // Método para seleccionar un Pokémon
   selectPokemon(name: string): void {
     this.selectedPokemon.set(name);
+    this.pokemonService.getPokemonDetail(name);
   }
 }

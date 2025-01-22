@@ -4,11 +4,10 @@ import { CommonModule } from '@angular/common';
 import { NgbCarouselModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-detail',
-  standalone: true,
-  imports: [CommonModule, NgbCarouselModule],
-  templateUrl: './detail.component.html',
-  styleUrl: './detail.component.scss'
+    selector: 'app-detail',
+    imports: [CommonModule, NgbCarouselModule],
+    templateUrl: './detail.component.html',
+    styleUrl: './detail.component.scss'
 })
 export class DetailComponent {
    pokemonDetail = input<PokemonDetail | null >();

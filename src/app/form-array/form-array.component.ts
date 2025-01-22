@@ -3,11 +3,10 @@ import { Component, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-form-array',
-  standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule],
-  templateUrl: './form-array.component.html',
-  styleUrl: './form-array.component.scss'
+    selector: 'app-form-array',
+    imports: [FormsModule, ReactiveFormsModule, CommonModule],
+    templateUrl: './form-array.component.html',
+    styleUrl: './form-array.component.scss'
 })
 export class FormArrayComponent {
   private readonly fb = inject(FormBuilder);

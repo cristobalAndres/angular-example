@@ -6,11 +6,10 @@ import { ModalDismissReasons, NgbDatepickerModule, NgbModal } from '@ng-bootstra
 import { CreateEditComponent } from '../form/create-edit/create-edit.component';
 
 @Component({
-  selector: 'app-forms',
-  standalone: true,
-  imports: [],
-  templateUrl: './forms.component.html',
-  styleUrl: './forms.component.scss'
+    selector: 'app-forms',
+    imports: [],
+    templateUrl: './forms.component.html',
+    styleUrl: './forms.component.scss'
 })
 export class FormsComponent {
   private readonly formService = inject(FormService);

@@ -1,11 +1,10 @@
 import { Component, computed, signal } from '@angular/core';
 
 @Component({
-  selector: 'app-signals',
-  standalone: true,
-  imports: [],
-  templateUrl: './signals.component.html',
-  styleUrl: './signals.component.scss',
+    selector: 'app-signals',
+    imports: [],
+    templateUrl: './signals.component.html',
+    styleUrl: './signals.component.scss'
 })
 export class SignalsComponent {
   // Signal que mantiene el valor del contador

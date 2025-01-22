@@ -3,11 +3,10 @@ import { Component, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-code-test',
-  standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule],
-  templateUrl: './code-test.component.html',
-  styleUrl: './code-test.component.scss'
+    selector: 'app-code-test',
+    imports: [FormsModule, ReactiveFormsModule, CommonModule],
+    templateUrl: './code-test.component.html',
+    styleUrl: './code-test.component.scss'
 })
 export class CodeTestComponent {
   private readonly fb = inject(FormBuilder);

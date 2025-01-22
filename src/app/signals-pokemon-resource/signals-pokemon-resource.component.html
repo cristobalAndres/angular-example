@@ -1,1 +1,46 @@
-<p>signals-pokemon-resource works!</p>
+<div class="pokedex-container">
+  <h1>Pokédex</h1>
+  <div class="search">
+    <input
+      type="text"
+      placeholder="Search Pokémon"
+      (input)="limitList($event)"
+    />
+  </div>
+  @if (pokemonListResource.isLoading()) {
+    <p>Loading...</p>
+  }
+
+  @if (pokemonListResource.error()) {
+    <div class="alert alert-danger" role="alert">
+      A simple danger alert—check it out!
+    </div>
+  }
+
+  @if (pokemonListResource.hasValue()) {
+    <div class="alert alert-success" role="alert">
+      A simple danger alert—check it out!
+    </div>
+  }
+  <div class="pokemon-list">
+    <ul>
+      @for (pokemon of pokemonListResource.value()?.results; track $index) {
+      <li>
+        <button (click)="selectPokemon(pokemon.name)">
+          {{ pokemon.name | titlecase }}
+        </button>
+      </li>
+    }
+    </ul>
+  </div>
+  <div *ngIf="pokemonDetailResource.value() as detail">
+    <div class="pokemon-detail">
+      <h2>{{ detail.name | titlecase }}</h2>
+      <img
+        [src]="detail.sprites.front_default"
+        [alt]="detail.name"
+      />
+      <p>Tipos: {{ pokemonTypes() }}</p>
+    </div>
+  </div>
+</div>

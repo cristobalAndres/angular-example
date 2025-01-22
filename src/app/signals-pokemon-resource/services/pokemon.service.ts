@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -19,12 +19,13 @@ export interface PokemonDetail {
   providedIn: 'root',
 })
 export class PokemonService {
+  private readonly http = inject(HttpClient);
   private apiUrl = 'https://pokeapi.co/api/v2';
 
-  constructor(private http: HttpClient) {}
-
-  getPokemonList(): Observable<PokemonListResponse> {
-    return this.http.get<PokemonListResponse>(`${this.apiUrl}/pokemon?limit=151`);
+  getPokemonList(page: number = 1, limit: number = 151): Observable<PokemonListResponse> {
+    console.log('Limit', limit);
+    console.log('page', page);
+    return this.http.get<PokemonListResponse>(`${this.apiUrl}/pokemon?limit=${limit}`);
   }
 
   getPokemonDetail(name: string): Observable<PokemonDetail> {

@@ -2,11 +2,10 @@ import { Component } from '@angular/core';
 import { getFintoc } from '@fintoc/fintoc-js';
 
 @Component({
-  selector: 'app-fintoc',
-  standalone: true,
-  imports: [],
-  templateUrl: './fintoc.component.html',
-  styleUrl: './fintoc.component.scss'
+    selector: 'app-fintoc',
+    imports: [],
+    templateUrl: './fintoc.component.html',
+    styleUrl: './fintoc.component.scss'
 })
 export class FintocComponent {
   ngOnInit(): void {

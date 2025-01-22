@@ -48,6 +48,10 @@ export const routes: Routes = [
     loadComponent: () => import('./signals-pokemon/signals-pokemon.component').then((m) => m.SignalsPokemonComponent),
   },
   {
+    path: 'signals-pokemon-resource',
+    loadComponent: () => import('./signals-pokemon-resource/signals-pokemon-resource.component').then((m) => m.SignalsPokemonResourceComponent),
+  },
+  {
     path: '**',
     redirectTo: '/forms',
     pathMatch: 'full',

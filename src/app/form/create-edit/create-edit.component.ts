@@ -10,11 +10,10 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormService } from '../../forms/form.service';
 
 @Component({
-  selector: 'app-create-edit',
-  standalone: true,
-  imports: [FormsModule, ReactiveFormsModule],
-  templateUrl: './create-edit.component.html',
-  styleUrl: './create-edit.component.scss',
+    selector: 'app-create-edit',
+    imports: [FormsModule, ReactiveFormsModule],
+    templateUrl: './create-edit.component.html',
+    styleUrl: './create-edit.component.scss'
 })
 export class CreateEditComponent {
   @Input() id: number | undefined;

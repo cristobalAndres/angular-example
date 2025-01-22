@@ -6,11 +6,10 @@ import { ListComponent } from "./list/list.component";
 import { DetailComponent } from "./detail/detail.component";
 
 @Component({
-  selector: 'app-pokemon',
-  standalone: true,
-  imports: [NgbCarouselModule, CommonModule, ListComponent, DetailComponent],
-  templateUrl: './pokemon.component.html',
-  styleUrl: './pokemon.component.scss'
+    selector: 'app-pokemon',
+    imports: [NgbCarouselModule, CommonModule, ListComponent, DetailComponent],
+    templateUrl: './pokemon.component.html',
+    styleUrl: './pokemon.component.scss'
 })
 export class PokemonComponent {
   private readonly pokemonService = inject(PokemonService);

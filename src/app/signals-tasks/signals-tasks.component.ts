@@ -7,11 +7,10 @@ interface Tarea {
 }
 
 @Component({
-  selector: 'app-signals-tasks',
-  standalone: true,
-  imports: [],
-  templateUrl: './signals-tasks.component.html',
-  styleUrl: './signals-tasks.component.scss'
+    selector: 'app-signals-tasks',
+    imports: [],
+    templateUrl: './signals-tasks.component.html',
+    styleUrl: './signals-tasks.component.scss'
 })
 export class SignalsTasksComponent {
   // Signal que mantiene la lista de tareas

@@ -4,11 +4,10 @@ import { CommonModule } from '@angular/common';
 import { PokemonService } from '../../services/pokemon/pokemon.service';
 
 @Component({
-  selector: 'app-list',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.scss'
+    selector: 'app-list',
+    imports: [CommonModule],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.scss'
 })
 export class ListComponent {
   private readonly pokemonService = inject(PokemonService);

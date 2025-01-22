@@ -11,11 +11,10 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Post } from '../../models/post.interface';
 
 @Component({
-  selector: 'app-create-post',
-  standalone: true,
-  imports: [FormsModule, ReactiveFormsModule],
-  templateUrl: './create-post.component.html',
-  styleUrl: './create-post.component.scss',
+    selector: 'app-create-post',
+    imports: [FormsModule, ReactiveFormsModule],
+    templateUrl: './create-post.component.html',
+    styleUrl: './create-post.component.scss'
 })
 export class CreatePostComponent {
   private readonly activeModal = inject(NgbActiveModal);
