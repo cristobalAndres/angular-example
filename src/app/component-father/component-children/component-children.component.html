@@ -1,0 +1,15 @@
+
+<div class="card">
+  <div class="card-body">
+    <h4 class="card-title">Children</h4>
+    title: {{title}} <br>
+    message: {{message}} <br>
+    name: {{name()}} <br>
+
+    <input type="text" (change)="sendMessageToFather($event)" placeholder="title"> <br>
+
+    <!-- <button (click)="sendMessageToFather()">Send Message 1</button> -->
+
+    <button (click)="sendMessageToFatherSignal()">Send Message 2</button>
+  </div>
+</div>

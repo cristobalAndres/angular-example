@@ -1,0 +1,16 @@
+
+<div class="card">
+  <div class="card-body">
+    <h4 class="card-title">Father</h4>
+
+    message from children component: {{messageFromChildren}} <br>
+
+    message from children component Signal: {{messageFromChildrenOutput}} <br>
+
+    <input type="text" [(ngModel)]="title" placeholder="title"> <br>
+   
+    <app-component-children [title]="title" [message]="message" [name]="name" (newItemEvent)="messageOutput($event)" (eventOutput)="messageOutputSignal($event)"></app-component-children>
+
+  </div>
+</div>
+

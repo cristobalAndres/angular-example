@@ -1,0 +1,84 @@
+.table-primary {
+  background-color: #cce5ff !important;
+}
+.table-warning {
+  background-color: #ffeeba !important;
+}
+.table-light {
+  background-color: #f8f9fa !important;
+}
+
+.btn-top-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 12px;
+  line-height: 14px;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.row-container {
+  position: relative;
+}
+
+
+
+/* table-dinamic.component.scss */
+.section-title {
+  background-color: #dee2e6;
+  font-weight: bold;
+}
+
+.number-cell { text-align: right; }
+.text-cell { text-align: left; }
+
+.global-total-row {
+  background-color: #343a40;
+  color: white;
+  
+  input {
+    color: white;
+    background-color: darken(#343a40, 5%);
+  }
+}
+
+.subtotal-row { background-color: #cce5ff!important; }
+.total-row { background-color: #ffeeba!important; }
+.normal-row { background-color: #f8f9fa!important; }
+
+.botton-options.without-border {
+  border: none;
+  padding: 0.25rem 0.5rem;
+}
+
+.options-list {
+  min-width: 250px;
+  
+  button {
+    i {
+      margin-right: 8px;
+      width: 20px;
+    }
+  }
+}
+
+.table-container {
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  width: 100%; /* Asegura que ocupe el ancho completo */
+  height: auto; /* Ajusta la altura según el contenido */
+  overflow: auto; /* Permite desplazamiento si la tabla es grande */
+}
+
+.table-wrapper {
+  max-width: 100%; /* Evita que la tabla sobresalga */
+  width: 80%; /* Ajusta el ancho según necesites */
+  overflow-x: auto; /* Permite scroll horizontal si es necesario */
+  text-align: center; /* Centra el contenido dentro del div */
+}

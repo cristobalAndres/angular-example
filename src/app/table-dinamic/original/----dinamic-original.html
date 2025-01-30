@@ -1,0 +1,420 @@
+<div class="container mt-4">
+  <h2>Tablas Dinámicas</h2>
+
+  <button class="btn btn-primary mb-3" (click)="addTable()">
+    + Agregar Tabla
+  </button>
+
+  <button class="btn btn-primary mb-3" (click)="recalcAllTables()">
+    + Actualzar todo
+  </button>
+
+  <!-- Recorremos cada tabla -->
+  <!-- <div
+    *ngFor="let table of tables; trackBy: trackByTable; let tableIndex = index"
+  > -->
+  @for (table of tables; track $index; let tableIndex = $index) {
+
+    <div class="mb-3 d-flex align-items-center">
+      <label class="fw-bold me-2 mb-0">Nombre de la Tabla:</label>
+      <input
+        type="text"
+        class="form-control me-2 w-50"
+        [(ngModel)]="table.name"
+        placeholder="Ingrese un nombre -"
+      />
+
+      @if(tableIndex !== 0) {
+      <button class="btn btn-danger" (click)="removeTable(tableIndex)">
+        <i class="fa fa-trash"></i>
+      </button>
+      }
+    </div>
+
+    <table class="table table-bordered">
+      @if (table.showHeader) {
+      <thead>
+        <tr>
+          <th width="10px"></th>
+          <!-- Recorremos las columnas -->
+           @for (col of columns; track $index; let i = $index) {
+          <th>
+            <div class="d-flex align-items-center">
+              <input
+                type="text"
+                class="form-control mb-2"
+                [(ngModel)]="col.title"
+                placeholder="Título de columna"
+              />
+
+              <div ngbDropdown class="d-inline-block ms-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary botton-options without-border"
+                  ngbDropdownToggle
+                >
+                  <i class="fa-solid fa-ellipsis"></i>
+                </button>
+                <div ngbDropdownMenu class="options-list">
+                  <!-- Botones para agregar columnas a la izquierda/derecha -->
+                  <button
+                    ngbDropdownItem
+                    (click)="addColumn(i, ColumnType.TEXT)"
+                  >
+                    <i class="fa fa-pencil"></i>
+                    Columna Texto Izquierda
+                  </button>
+                  <button
+                    ngbDropdownItem
+                    (click)="addColumn(i + 1, ColumnType.TEXT)"
+                  >
+                    <i class="fa fa-pencil"></i>
+                    Columna Texto Derecha
+                  </button>
+                  <button
+                    ngbDropdownItem
+                    (click)="addColumn(i, ColumnType.NUMBER)"
+                  >
+                    <i class="fa fa-trash"></i>
+                    Columna Numérica Izquierda
+                  </button>
+                  <button
+                    ngbDropdownItem
+                    (click)="addColumn(i + 1, ColumnType.NUMBER)"
+                  >
+                    <i class="fa fa-trash"></i>
+                    Columna Numérica Derecha
+                  </button>
+
+                  <!-- Nuevo: Columna CUSTOM_SUM -->
+                  <button
+                    ngbDropdownItem
+                    (click)="addColumn(i + 1, ColumnType.CUSTOM_SUM)"
+                  >
+                    <i class="fa fa-sigma"></i>
+                    Columna Suma
+                  </button>
+
+                  <!-- Eliminar columna -->
+                  <button ngbDropdownItem (click)="removeColumn(i)">
+                    <i class="fa fa-copy"></i>
+                    Eliminar Columna
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cuando la columna es CUSTOM_SUM, mostramos un selector para elegir qué columnas sumar -->
+             @if (col.type === ColumnType.CUSTOM_SUM) {
+            <div class="mt-2">
+              <label class="fw-bold d-block">Columnas a Sumar:</label>
+              <select
+                class="form-select form-select-sm"
+                multiple
+                [(ngModel)]="col.columnsToSum"
+                (change)="updateTotals(tableIndex)"
+              >
+                <!-- Listamos todas las columnas posibles (excepto la propia) -->
+                 @for (optCol of columns; track $index;let idx = $index) {
+                <option
+                  [disabled]="idx === i"
+                  [ngValue]="idx"
+                >
+                  {{ optCol.title || "Col " + (idx + 1) }}
+                </option>
+              }
+              </select>
+            </div>
+          }
+          </th>
+        }
+        </tr>
+      </thead>
+    }
+
+      <tbody>
+        <!-- Recorremos secciones -->
+         @for (section of table.sections; track $index; let sectionIndex = $index) {
+        <ng-container>
+          @for (row of section; track $index; let rowIndex = $index) { @if
+          (row.type === RowType.CUSTOM_TOTAL) {
+          <tr class="table-warning align-middle">
+            <!-- Celda de opciones con el selector dentro -->
+            <td>
+              <div ngbDropdown class="d-inline-block">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary botton-options without-border"
+                  ngbDropdownToggle
+                >
+                  <i class="fa-solid fa-ellipsis"></i>
+                </button>
+                <div ngbDropdownMenu class="options-list">
+
+                  <button
+                    ngbDropdownItem
+                    (click)="removeRow(tableIndex, sectionIndex, rowIndex)"
+                  >
+                    <i class="fa fa-copy"></i>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+
+              <!-- Selector de tablas dentro del mismo td -->
+              <label class="fw-bold d-block mt-2">Tablas a Sumar:</label>
+              <select
+                class="form-select form-select-sm"
+                multiple
+                [(ngModel)]="row.tableIndexesToSum"
+                (change)="updateTotals(tableIndex, sectionIndex)"
+              >
+                @for (table of tables; track trackByTable($index, table); let
+                idx = $index) {
+                <option [value]="idx">{{ table.name }}</option>
+                }
+              </select>
+            </td>
+
+            <!-- Celdas de los valores con estructura correcta -->
+            @for (col of columns; track trackByColumn($index, col); let colIndex
+            = $index) {
+            <!-- Solo muestra el input si la columna es numérica -->
+             @if (col.type === ColumnType.NUMBER) {
+            <td>
+              <input
+                type="text"
+                class="form-control form-control-sm fw-bold text-end bg-white"
+                readonly
+                [(ngModel)]="row.data[colIndex]"
+              />
+            </td>
+          }
+            <!-- Crea una celda vacía si la columna es de texto para mantener la estructura -->
+             @if (col.type === ColumnType.TEXT) {
+            <td>
+              <input
+                [type]="col.type"
+                class="form-control"
+                [(ngModel)]="row.data[colIndex]"
+                (input)="updateTotals(tableIndex, sectionIndex)"
+                placeholder="Ingresar texto"
+              />
+            </td>
+          }
+          @if (col.type === ColumnType.CUSTOM_SUM) {
+            <td>
+              <input
+                type="text"
+                class="form-control form-control-sm fw-bold text-end bg-white"
+                readonly
+                [(ngModel)]="row.data[colIndex]"
+              />
+            </td>
+          }
+            }
+          </tr>
+          } @else {
+          <tr
+            [ngClass]="{
+              'table-primary': row.type === 'subtotal',
+              'table-warning': row.type === 'total',
+              'table-light': row.type === 'normal'
+            }"
+          >
+            <td>
+              <div ngbDropdown class="d-inline-block">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary botton-options without-border"
+                  ngbDropdownToggle
+                >
+                  <i class="fa-solid fa-ellipsis"></i>
+                </button>
+                <div ngbDropdownMenu class="options-list">
+                  <button
+                    ngbDropdownItem
+                    (click)="
+                      addRow(tableIndex, sectionIndex, rowIndex, RowType.NORMAL)
+                    "
+                  >
+                    <i class="fa fa-pencil"></i>
+                    Fila Normal Arriba
+                  </button>
+
+                  <button
+                    ngbDropdownItem
+                    (click)="
+                      addRow(
+                        tableIndex,
+                        row.type === 'total' ? sectionIndex + 1 : sectionIndex,
+                        rowIndex + 1,
+                        RowType.NORMAL
+                      )
+                    "
+                  >
+                    <i class="fa fa-trash"></i>
+                    Fila Normal Abajo
+                  </button>
+
+                  @if(row.type === RowType.NORMAL) {
+                  <button
+                    ngbDropdownItem
+                    (click)="
+                      addRow(
+                        tableIndex,
+                        sectionIndex,
+                        rowIndex + 1,
+                        RowType.SUBTOTAL
+                      )
+                    "
+                  >
+                    <i class="fa fa-copy"></i>
+                    Subtotal
+                  </button>
+                  }
+
+                  <button
+                    ngbDropdownItem
+                    (click)="
+                      addRow(
+                        tableIndex,
+                        sectionIndex,
+                        rowIndex + 1,
+                        RowType.TOTAL
+                      )
+                    "
+                  >
+                    <i class="fa fa-copy"></i>
+                    Total
+                  </button>
+
+                  <button
+                    ngbDropdownItem
+                    (click)="
+                      addRow(
+                        tableIndex,
+                        sectionIndex,
+                        rowIndex,
+                        RowType.SECTION_TITLE
+                      )
+                    "
+                  >
+                    <i class="fa fa-heading"></i>
+                    Subtítulo
+                  </button>
+
+                  <button
+                    ngbDropdownItem
+                    (click)="
+                      addRow(
+                        tableIndex,
+                        sectionIndex,
+                        rowIndex + 1,
+                        RowType.CUSTOM_TOTAL
+                      )
+                    "
+                  >
+                    <i class="fa fa-sum"></i>
+                    Total Personalizado
+                  </button>
+
+                  <!-- @if (row.type !== RowType.TOTAL) { -->
+                  <button
+                    ngbDropdownItem
+                    (click)="removeRow(tableIndex, sectionIndex, rowIndex)"
+                  >
+                    <i class="fa fa-copy"></i>
+                    Eliminar
+                  </button>
+                  <!-- } -->
+                </div>
+              </div>
+            </td>
+
+            @if (row.type === RowType.SECTION_TITLE) {
+            <td [attr.colspan]="columns.length + 1">
+              <input
+                type="text"
+                class="form-control fw-bold"
+                [(ngModel)]="row.data[0]"
+                placeholder="Título de sección"
+              />
+            </td>
+            } @if (row.type !== RowType.SECTION_TITLE) { @for (col of columns;
+            track trackByColumn($index, col); let colIndex = $index) {
+            <td>
+              <input
+                [type]="col.type"
+                class="form-control"
+                [(ngModel)]="row.data[colIndex]"
+                (input)="updateTotals(tableIndex, sectionIndex)"
+                placeholder="Ingresar {{
+                  col.type === 'number' ? 'número' : 'texto'
+                }}"
+              />
+            </td>
+            } }
+          </tr>
+
+          } }
+        </ng-container>
+      }
+      </tbody>
+
+      <!-- tfoot: si se muestra total global -->
+       @if (table.showGlobalTotal) {
+      <tfoot>
+        <tr class="table-dark">
+          <td></td>
+          @for (col of columns; track $index; let colIndex = $index) {
+          <td>
+            @if(col.type === ColumnType.NUMBER) {
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="table.globalTotalRow.data[colIndex]"
+              readonly
+            />
+            } @if(col.type === ColumnType.TEXT) {
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Total"
+              [(ngModel)]="table.globalTotalRow.data[colIndex]"
+            />
+            } @if(col.type === ColumnType.CUSTOM_SUM) {
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="table.globalTotalRow.data[colIndex]"
+            />
+            }
+          </td>
+        }
+        </tr>
+      </tfoot>
+    }
+    </table>
+
+    <button
+      class="btn btn-secondary mb-3"
+      (click)="toggleGlobalTotal(tableIndex)"
+    >
+      {{
+        table.showGlobalTotal
+          ? BUTTON_TEXTS.HIDE_TOTAL
+          : BUTTON_TEXTS.SHOW_TOTAL
+      }}
+    </button>
+  <!-- </div> -->
+}
+</div>
+
+<button type="button" class="btn btn-primary" (click)="submit()">
+  Datos Tablas
+</button>
+
+<div class="table-container">
+  <div class="table-wrapper" [innerHTML]="generateUnifiedTable()"></div>
+</div>

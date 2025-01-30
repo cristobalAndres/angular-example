@@ -9,10 +9,11 @@ import { HeaderComponent } from "./layout/header/header.component";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { FormsComponent } from "./forms/forms.component";
+import { TableDinamicComponent } from "./table-dinamic/table-dinamic.component";
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, FormArrayComponent, FormsModule, ReactiveFormsModule, HeaderComponent, FormsComponent],
+    imports: [RouterOutlet, FormArrayComponent, FormsModule, ReactiveFormsModule, HeaderComponent, FormsComponent, TableDinamicComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })

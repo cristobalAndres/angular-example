@@ -33,6 +33,20 @@
     }
     </ul>
   </div>
+  <div class="mb-3">
+    <label for="" class="form-label">City</label>
+    <select
+      class="form-select form-select-lg"
+      name=""
+      id=""
+      (change)="changeCity($event)"
+    >
+     @for (city of cities; track $index) {
+      <option [value]="city.id">{{ city.name }}</option>
+     }
+    </select>
+  </div>
+  
   <div *ngIf="pokemonDetailResource.value() as detail">
     <div class="pokemon-detail">
       <h2>{{ detail.name | titlecase }}</h2>

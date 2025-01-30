@@ -52,6 +52,14 @@ export const routes: Routes = [
     loadComponent: () => import('./signals-pokemon-resource/signals-pokemon-resource.component').then((m) => m.SignalsPokemonResourceComponent),
   },
   {
+    path: 'table-dinamic',
+    loadComponent: () => import('./table-dinamic/table-dinamic.component').then((m) => m.TableDinamicComponent),
+  },
+  {
+    path: 'component-father',
+    loadComponent: () => import('./component-father/component-father.component').then((m) => m.ComponentFatherComponent),
+  },
+  {
     path: '**',
     redirectTo: '/forms',
     pathMatch: 'full',

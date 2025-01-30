@@ -43,3 +43,40 @@ $theme-colors: (
 body {
   font-family: 'Futura LT', sans-serif;
 }
+
+/* styles.css */
+.btn-outline-primary[ngbDropdownToggle]::after {
+  display: none;
+}
+
+.dropdown-menu-end {
+  right: 0;
+  left: auto;
+}
+
+// .botton-options {
+//   color: black !important;
+// }
+
+// .botton-options:hover {
+//   background-color: rgb(230, 230, 230) !important;
+// }
+
+.without-border {
+  border: none !important;
+}
+
+.botton-options .btn-check:checked + .btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check) + .btn:active {
+  background-color: rgb(230, 230, 230) !important;
+  border-color: rgb(230, 230, 230) !important;
+}
+
+.botton-options .option-selected {
+  background-color: rgb(230, 230, 230) !important;
+  border-color: rgb(230, 230, 230) !important;
+}
+
+.options-list .dropdown-item:active{
+  color: rgba(0, 99, 83, 1) !important; /* Cambia a tu color preferido */
+  background-color: rgba(217, 243, 239, 1) !important;
+}

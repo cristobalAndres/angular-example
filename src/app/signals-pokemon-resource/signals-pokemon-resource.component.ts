@@ -13,6 +13,20 @@ import { CommonModule } from '@angular/common';
 export class SignalsPokemonResourceComponent {
   private pokemonService = inject(PokemonService);
 
+  cities = [{
+    id: 1,
+    name: 'Medellín'
+  }, {
+    id: 2,
+    name: 'Bogotá'
+  }, {
+    id: 3,
+    name: 'Cali'
+  }, {
+    id: 4,
+    name: 'Cartagena'
+  }]
+
   // Señal para el nombre del Pokémon seleccionado
   selectedPokemon = signal<string | null>(null);
 
@@ -60,6 +74,11 @@ export class SignalsPokemonResourceComponent {
   limitList(value: any): void {
     console.log('Limit', value.target.value);
     this.limit.set(value.target.value);
+  }
+
+  changeCity(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    console.log('Change city', value);
   }
 }
 
