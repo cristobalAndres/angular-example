@@ -1,0 +1,37 @@
+<form [formGroup]="form">
+  <div formArrayName="posts">
+    <div *ngFor="let post of formPostsControls; let i = index" [formGroupName]="i" class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Post {{ i + 1 }}</h5>
+        
+        <div class="mb-3">
+          <label for="title" class="form-label">Título</label>
+          <input formControlName="title" id="title" class="form-control" placeholder="Ingrese título" />
+        </div>
+
+        <div formArrayName="items">
+          <div *ngFor="let item of getItemsControls(i); let j = index" [formGroupName]="j" class="card mb-2">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted">Ítem {{ j + 1 }}</h6>
+
+              <div class="mb-2">
+                <label for="name" class="form-label">Nombre</label>
+                <input formControlName="name" id="name" class="form-control" placeholder="Ingrese nombre" />
+              </div>
+
+              <div class="mb-2">
+                <label for="description" class="form-label">Descripción</label>
+                <input formControlName="description" id="description" class="form-control" placeholder="Ingrese descripción" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-sm btn-primary me-2" (click)="addItem(i)">Añadir Ítem</button>
+        <button type="button" class="btn btn-sm btn-danger" (click)="removePost(i)">Eliminar Post</button>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-success mt-3" (click)="addPost()">Añadir Post</button>
+</form>

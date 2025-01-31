@@ -60,6 +60,10 @@ export const routes: Routes = [
     loadComponent: () => import('./component-father/component-father.component').then((m) => m.ComponentFatherComponent),
   },
   {
+    path: 'form-array-array',
+    loadComponent: () => import('./form-array-2/form-array-2.component').then((m) => m.FormArray2Component),
+  },
+  {
     path: '**',
     redirectTo: '/forms',
     pathMatch: 'full',

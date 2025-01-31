@@ -72,18 +72,6 @@ export class FormArrayComponent {
       ]
     };
 
-    // this.formPost.patchValue(data);
-
-    // data.posts.forEach(post => {
-    //   const posts = this.formPost.get('posts') as FormArray;
-    //   posts.push(this.fb.group(post));
-    // });
-
-    // data.posts.forEach(post => {
-    //   this.addPost();
-    // });
-
-    // this.formPost.patchValue(data);
   }
 
   get formPostsControls() {
