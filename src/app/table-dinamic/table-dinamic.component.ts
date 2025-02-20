@@ -273,7 +273,7 @@ export class TableDinamicComponent {
     });
   
     // Recalcular todas las tablas para reflejar los cambios
-    this.recalcAllTables();
+    setTimeout(() => this.recalcAllTables(), 0);
   }
   
   
@@ -295,8 +295,8 @@ export class TableDinamicComponent {
       });
     });
 
-    // 3) Podrías recalcular todo también si deseas
-    this.recalcAllTables();
+    // 🔹 Ejecutamos recálculo automático
+    setTimeout(() => this.recalcAllTables(), 0);
   }
 
   /** Actualiza todas las tablas llamando a un callback, luego resetea su globalTotalRow. */
@@ -348,7 +348,8 @@ export class TableDinamicComponent {
       sections.push([]);
     }
 
-    this.updateTotals(tableIndex, sectionIndex);
+    // this.updateTotals(tableIndex, sectionIndex);
+    setTimeout(() => this.recalcAllTables(), 0);
   }
 
   removeRow(tableIndex: number, sectionIndex: number, rowIndex: number): void {
