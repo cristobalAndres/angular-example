@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { OptionsService } from '../signals-tasks/options.service';
 
 export enum ColumnType {
   TEXT = 'text',
   NUMBER = 'number',
   CUSTOM_SUM = 'custom_sum',
+  SELECT = 'select' // 🔹 Nuevo tipo de columna
 }
 
 export enum RowType {
@@ -15,21 +17,28 @@ export enum RowType {
   SUBTOTAL = 'subtotal',
   TOTAL = 'total',
   SECTION_TITLE = 'section_title',
-  CUSTOM_TOTAL = 'custom_total',
+  CUSTOM_TOTAL = 'custom_total'
 }
+
+// const OPTIONS = [
+//   { id: 3, code: 'venta' },
+//   { id: 4, code: 'compra' }
+// ];
+
 
 export type CellValue = number | string;
 
 export interface Column {
   type: ColumnType;
   title: string;
-  columnsToSum?: number[];
+  columnsToSum?: number[];  // columnas a sumar en caso de CUSTOM_SUM
+  options?: { id: number; code: string }[]; // 🔹 Agregamos opciones para SELECT
 }
 
 export interface Row {
   data: CellValue[];
   type: RowType;
-  tableIndexesToSum?: number[];
+  tableIndexesToSum?: number[]; // para filas CUSTOM_TOTAL (suma de otras tablas)
 }
 
 export interface Table {
@@ -49,23 +58,29 @@ export interface Table {
 })
 export class TableDinamicComponent {
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly optionsService = inject(OptionsService);
 
-  // // Signals reactivos
-  // columns = signal<Column[]>([
-  //   { type: ColumnType.TEXT, title: '' },
-  // ]);
-  // tables = signal<Table[]>([]);
-
+  OPTIONS = [];
   
-    // Signals reactivos
-  columns = signal<Column[]>([
+  // columns: Column[] = [
+  //   { type: ColumnType.TEXT, title: '' },
+  // ];
+
+  // tables: Table[] = [];
+
+
+  // ------------------------------------------
+  //           Datos iniciales
+  // ------------------------------------------
+  columns: Column[] = [
     { type: ColumnType.TEXT,  title: 'Activos' },
-    { type: ColumnType.TEXT,  title: 'Notas' },
+    { type: ColumnType.SELECT, title: 'Notas', options: [] }, // 🔹 Nueva columna SELECT
     { type: ColumnType.NUMBER, title: '31/01/2021' },
     { type: ColumnType.NUMBER, title: '31/01/2020' },
-  ]);
-  tables = signal<Table[]>([
-      {
+  ];
+
+  tables: Table[] = [
+    {
       name: 'Activos',
       sections: [
         [
@@ -167,28 +182,57 @@ export class TableDinamicComponent {
       globalTotalRow: { data: ['', '', 0, 0], type: RowType.TOTAL },
       showGlobalTotal: false
     }
-  ]);
+  ];
 
-  // Valores computados
+  // Para la plantilla
   readonly ColumnType = ColumnType;
   readonly RowType = RowType;
   readonly BUTTON_TEXTS = {
     SHOW_TOTAL: 'Mostrar Total Global',
-    HIDE_TOTAL: 'Ocultar Total Global',
+    HIDE_TOTAL: 'Ocultar Total Global'
   };
 
   constructor() {
-    effect(() => {
-      if (this.tables().length === 0) {
-        this.tables.update(() => [this.createNewTable(true)]);
-      }
+    // Si quisieras crear siempre una tabla nueva en blanco, la llamas:
+    // this.tables.push(this.createNewTable(true));
+    this.loadOptions();
+  }
+
+  private loadOptions(): void {
+    this.optionsService.getOptions().subscribe(options => {
+      // Asignamos las opciones a todas las columnas de tipo SELECT
+      this.columns.forEach(col => {
+        if (col.type === ColumnType.SELECT) {
+          col.options = options;
+        }
+      });
+
+      // Opcional: Verificar y actualizar los valores seleccionados en la tabla
+      this.tables.forEach(table => {
+        table.sections.forEach(section => {
+          section.forEach(row => {
+            row.data.forEach((value, index) => {
+              const column = this.columns[index];
+              if (column?.type === ColumnType.SELECT && value !== null) {
+                // Si el valor no existe en las nuevas opciones, limpiarlo
+                const exists = column.options?.some(opt => opt.id === +value);
+                if (!exists) {
+                  row.data[index] = '';
+                }
+              }
+            });
+          });
+        });
+      });
     });
   }
 
-  // Método de creación con inicialización segura
+  // -----------------------------------------
+  //     CREAR TABLA O FILA EN BLANCO
+  // -----------------------------------------
   private createNewTable(showHeader: boolean): Table {
     return {
-      name: `Tabla ${this.tables().length + 1}`,
+      name: `Tabla ${this.tables.length + 1}`,
       sections: [[this.createNewRow(RowType.NORMAL)]],
       showHeader,
       globalTotalRow: this.createNewRow(RowType.TOTAL),
@@ -198,259 +242,229 @@ export class TableDinamicComponent {
 
   private createNewRow(type: RowType): Row {
     return {
-      data: this.columns().map((col) =>
-        type === RowType.SECTION_TITLE
-          ? ''
-          : [ColumnType.NUMBER, ColumnType.CUSTOM_SUM].includes(col.type)
-          ? 0
-          : ''
-      ),
-      type,
+      data: (type === RowType.SECTION_TITLE)
+        ? ['']
+        : this.columns.map(col => (col.type === ColumnType.NUMBER) ? 0 : ''),
+      type
     };
   }
 
-  // Operaciones de columnas
+  // -----------------------------------------
+  //           MÉTODOS DE COLUMNAS
+  // -----------------------------------------
   addColumn(position: number, type: ColumnType): void {
-    this.columns.update((cols) => {
-      const newCol: Column = { type, title: '' };
-      if (type === ColumnType.CUSTOM_SUM) newCol.columnsToSum = [];
-      const newCols = [...cols];
-      newCols.splice(position, 0, newCol);
-      return newCols;
+    const newCol: Column = { type, title: '' };
+  
+    // Si es una columna SELECT, asignar opciones si ya han sido cargadas
+    if (type === ColumnType.SELECT) {
+      newCol.options = this.columns.find(col => col.type === ColumnType.SELECT)?.options || [];
+    }
+  
+    // Insertamos la nueva columna en la estructura de datos
+    this.columns.splice(position, 0, newCol);
+  
+    // Agregar una nueva celda en todas las filas de todas las tablas
+    this.updateAllTablesColumns(table => {
+      table.sections.forEach(section => {
+        section.forEach(row => {
+          row.data.splice(position, 0, '');
+        });
+      });
     });
-
-    this.updateAllTablesColumns();
+  
+    // Recalcular todas las tablas para reflejar los cambios
     this.recalcAllTables();
   }
+  
+  
 
   removeColumn(index: number): void {
-    if (this.columns().length <= 1) return;
+    if (this.columns.length <= 1) return;
 
-    this.columns.update((cols) => {
-      const newCols = [...cols];
-      newCols.splice(index, 1);
-      return newCols;
+    // 1) Quitar la columna del array
+    this.columns.splice(index, 1);
+
+    // 2) Eliminar la celda en cada fila
+    this.updateAllTablesColumns(table => {
+      table.sections.forEach(section => {
+        section.forEach(row => {
+          if (row.type !== RowType.SECTION_TITLE) {
+            row.data.splice(index, 1);
+          }
+        });
+      });
     });
 
-    this.updateAllTablesColumns();
+    // 3) Podrías recalcular todo también si deseas
     this.recalcAllTables();
   }
 
-  private updateAllTablesColumns(): void {
-    this.tables.update((tables) =>
-      tables.map((table) => ({
-        ...table,
-        sections: table.sections.map((section) =>
-          section.map((row) => ({
-            ...row,
-            data: this.columns().map((col, i) =>
-              i < row.data.length
-                ? row.data[i]
-                : [ColumnType.NUMBER, ColumnType.CUSTOM_SUM].includes(col.type)
-                ? 0
-                : ''
-            ),
-          }))
-        ),
-        globalTotalRow: {
-          ...table.globalTotalRow,
-          data: this.columns().map((col) =>
-            [ColumnType.NUMBER, ColumnType.CUSTOM_SUM].includes(col.type)
-              ? 0
-              : ''
-          ),
-        },
-      }))
-    );
+  /** Actualiza todas las tablas llamando a un callback, luego resetea su globalTotalRow. */
+  private updateAllTablesColumns(callback: (table: Table) => void): void {
+    this.tables.forEach(table => {
+      callback(table);
+      // Resetear su globalTotalRow para la nueva estructura
+      table.globalTotalRow.data = this.columns.map(col =>
+        (col.type === ColumnType.NUMBER || col.type === ColumnType.CUSTOM_SUM) ? 0 : ''
+      );
+    });
   }
 
-  // Operaciones de tablas
+  // -----------------------------------------
+  //            MÉTODOS DE TABLA
+  // -----------------------------------------
   addTable(): void {
-    this.tables.update((tables) => [...tables, this.createNewTable(false)]);
+    this.tables.push(this.createNewTable(false));
   }
 
   removeTable(tableIndex: number): void {
-    if (this.tables().length <= 1) return;
-    this.tables.update((tables) =>
-      tables.filter((_, index) => index !== tableIndex)
-    );
+    if (this.tables.length === 1) return;  // si no quieres permitir menos de 1
+
+    this.tables.splice(tableIndex, 1);
   }
 
   toggleGlobalTotal(tableIndex: number): void {
-    this.tables.update((tables) =>
-      tables.map((table, index) =>
-        index === tableIndex
-          ? { ...table, showGlobalTotal: !table.showGlobalTotal }
-          : table
-      )
-    );
-    this.updateGlobalTotal(tableIndex);
+    const table = this.tables[tableIndex];
+    table.showGlobalTotal = !table.showGlobalTotal;
+    if (table.showGlobalTotal) {
+      this.updateGlobalTotal(tableIndex);
+    }
   }
 
-  // Operaciones de filas
-  addRow(
-    tableIndex: number,
-    sectionIndex: number,
-    position: number,
-    type: RowType
-  ): void {
-    this.tables.update((tables) =>
-      tables.map((table, tIdx) => {
-        if (tIdx !== tableIndex) return table;
-  
-        const newRow = this.createNewRow(type);
-        if (type === RowType.CUSTOM_TOTAL) newRow.tableIndexesToSum = [];
-  
-        // Crear copia actualizada de las secciones
-        let newSections = [...table.sections];
-        
-        // Actualizar la sección actual
-        newSections = newSections.map((section, sIdx) => {
-          if (sIdx !== sectionIndex) return section;
-          const newSection = [...section];
-          newSection.splice(position, 0, newRow);
-          return newSection;
-        });
-  
-        // Añadir nueva sección vacía solo si es TOTAL
-        if (type === RowType.TOTAL) {
-          newSections = [...newSections, []];
-        }
-  
-        return {
-          ...table,
-          sections: newSections
-        };
-      })
-    );
+  // -----------------------------------------
+  //         MÉTODOS DE FILAS
+  // -----------------------------------------
+  addRow(tableIndex: number, sectionIndex: number, position: number, type: RowType): void {
+    const newRow = this.createNewRow(type);
+    if (type === RowType.CUSTOM_TOTAL) {
+      newRow.tableIndexesToSum = [];
+    }
+
+    const sections = this.tables[tableIndex].sections;
+    sections[sectionIndex].splice(position, 0, newRow);
+
+    // Regla: cuando agregas un TOTAL, creas nueva sección debajo
+    if (type === RowType.TOTAL) {
+      sections.push([]);
+    }
+
     this.updateTotals(tableIndex, sectionIndex);
   }
 
   removeRow(tableIndex: number, sectionIndex: number, rowIndex: number): void {
-    this.tables.update((tables) =>
-      tables.map((table, tIdx) => {
-        if (tIdx !== tableIndex) return table;
+    const section = this.tables[tableIndex].sections[sectionIndex];
+    if (section.length === 1 && sectionIndex === 0 && tableIndex === 0) return;
 
-        return {
-          ...table,
-          sections: table.sections.map((section, sIdx) => {
-            if (sIdx !== sectionIndex) return section;
-
-            return section.filter((_, rIdx) => rIdx !== rowIndex);
-          }),
-        };
-      })
-    );
+    section.splice(rowIndex, 1);
     this.updateTotals(tableIndex, sectionIndex);
   }
 
-  // Cálculos
+  // -----------------------------------------
+  //         RECÁLCULOS GLOBALES
+  // -----------------------------------------
+  /** Recalcula TODAS las tablas y TODAS las secciones. */
   recalcAllTables(): void {
-    this.tables().forEach((_, tIndex) => {
-      this.updateTotals(tIndex);
+    this.tables.forEach((table, tIndex) => {
+      table.sections.forEach((_, sIndex) => {
+        this.updateTotals(tIndex, sIndex);
+      });
     });
   }
 
+  /** Recalcula totales, subtotales, custom, etc. para la tabla dada. 
+   *  Si sectionIndex está definido, recalcula esa sección.
+   */
   updateTotals(tableIndex: number, sectionIndex?: number): void {
-    this.tables.update((tables) =>
-      tables.map((table, tIdx) => {
-        if (tIdx !== tableIndex) return table;
+    // 1) Actualizar columnas CUSTOM_SUM en todas las tablas (por si alguna depende de otra)
+    this.updateCustomSumColumnsInAllTables();
 
-        // Actualizar CUSTOM_SUM
-        const updatedSections = table.sections.map((section) =>
-          section.map((row) => {
-            const newData = [...row.data];
-            this.columns().forEach((col, colIndex) => {
-              if (col.type === ColumnType.CUSTOM_SUM && col.columnsToSum) {
-                newData[colIndex] = col.columnsToSum.reduce(
-                  (sum, idx) => sum + this.parseCellValue(row.data[idx]),
-                  0
-                );
+    // 2) Recalcular filas SUBTOTAL, TOTAL y CUSTOM_TOTAL en la sección afectada
+    if (sectionIndex !== undefined) {
+      this.recalcSubtotalsAndTotals(tableIndex, sectionIndex);
+    }
+
+    // 3) Recalcular TODAS las filas CUSTOM_TOTAL (de otras tablas que dependan de la actual)
+    this.updateAllCustomTotals();
+
+    // 4) Recalcular total global si la tabla lo muestra
+    this.recalcGlobalTotalIfEnabled(tableIndex);
+  }
+
+  /** Encapsula la recalculación de SUBTOTAL/TOTAL en una sección. */
+  private recalcSubtotalsAndTotals(tableIndex: number, sectionIndex: number): void {
+    const table = this.tables[tableIndex];
+    const section = table.sections[sectionIndex];
+
+    section.forEach((row, rowIndex) => {
+      if ([RowType.SUBTOTAL, RowType.TOTAL, RowType.CUSTOM_TOTAL].includes(row.type)) {
+        // Recorremos columnas
+        this.columns.forEach((col, colIndex) => {
+          if (col.type === ColumnType.NUMBER || col.type === ColumnType.CUSTOM_SUM) {
+            row.data[colIndex] = (row.type === RowType.CUSTOM_TOTAL)
+              ? this.calculateCustomTotal(row.tableIndexesToSum!, colIndex)
+              : this.calculateColumnSum(tableIndex, sectionIndex, colIndex, rowIndex);
+          }
+        });
+      }
+    });
+  }
+
+  /** Recalcula la fila globalTotalRow si showGlobalTotal es true. */
+  private recalcGlobalTotalIfEnabled(tableIndex: number): void {
+    const table = this.tables[tableIndex];
+    if (table.showGlobalTotal) {
+      this.updateGlobalTotal(tableIndex);
+    }
+  }
+
+  // -----------------------------------------
+  //     CÁLCULOS ESPECÍFICOS (sumas)
+  // -----------------------------------------
+  /** Recalcula todas las columnas CUSTOM_SUM en todas las tablas. */
+  private updateCustomSumColumnsInAllTables(): void {
+    this.tables.forEach((table, tIndex) => {
+      table.sections.forEach(section => {
+        section.forEach(row => {
+          this.columns.forEach((col, colIndex) => {
+            if (col.type === ColumnType.CUSTOM_SUM && col.columnsToSum) {
+              let sum = 0;
+              col.columnsToSum.forEach(idx => {
+                sum += this.parseCellValue(row.data[idx]);
+              });
+              row.data[colIndex] = sum;
+            }
+          });
+        });
+      });
+    });
+  }
+
+  /** Recalcula TODAS las filas CUSTOM_TOTAL de TODAS las tablas. */
+  private updateAllCustomTotals(): void {
+    this.tables.forEach((table, tableIndex) => {
+      table.sections.forEach((section, sectionIndex) => {
+        section.forEach(row => {
+          if (row.type === RowType.CUSTOM_TOTAL) {
+            // Recorremos columnas
+            this.columns.forEach((col, colIndex) => {
+              if (col.type === ColumnType.NUMBER || col.type === ColumnType.CUSTOM_SUM) {
+                row.data[colIndex] = this.calculateCustomTotal(row.tableIndexesToSum!, colIndex);
               }
             });
-            return { ...row, data: newData };
-          })
-        );
-
-        // Actualizar subtotales/totales
-        if (sectionIndex !== undefined) {
-          updatedSections[sectionIndex] = updatedSections[sectionIndex].map(
-            (row, rowIndex) => {
-              if (
-                ![
-                  RowType.SUBTOTAL,
-                  RowType.TOTAL,
-                  RowType.CUSTOM_TOTAL,
-                ].includes(row.type)
-              ) {
-                return row;
-              }
-
-              const newData = [...row.data];
-              this.columns().forEach((col, colIndex) => {
-                if (
-                  [ColumnType.NUMBER, ColumnType.CUSTOM_SUM].includes(col.type)
-                ) {
-                  newData[colIndex] =
-                    row.type === RowType.CUSTOM_TOTAL
-                      ? this.calculateCustomTotal(
-                          row.tableIndexesToSum || [],
-                          colIndex
-                        )
-                      : this.calculateColumnSum(
-                          tableIndex,
-                          sectionIndex,
-                          colIndex,
-                          rowIndex
-                        );
-                }
-              });
-              return { ...row, data: newData };
-            }
-          );
-        }
-
-        // Actualizar total global
-        const globalTotalRow = table.showGlobalTotal
-          ? this.calculateGlobalTotal(table)
-          : table.globalTotalRow;
-
-        return {
-          ...table,
-          sections: updatedSections,
-          globalTotalRow,
-        };
-      })
-    );
-  }
-
-  private calculateGlobalTotal(table: Table): Row {
-    const newData = this.columns().map((col, colIndex) => {
-      if (![ColumnType.NUMBER, ColumnType.CUSTOM_SUM].includes(col.type))
-        return '';
-
-      return table.sections.reduce((sum, section) => {
-        const totalRow = section.find((r) => r.type === RowType.TOTAL);
-        return sum + this.parseCellValue(totalRow?.data[colIndex] || 0);
-      }, 0);
+          }
+        });
+      });
     });
-
-    return { ...table.globalTotalRow, data: newData };
   }
 
-  private calculateCustomTotal(
-    tableIndexes: number[],
-    colIndex: number
-  ): number {
+  private calculateCustomTotal(tableIndexes: number[], colIndex: number): number {
+    // Suma los TOTAl de cada tabla referenciada
     return tableIndexes.reduce((sum, tableIdx) => {
-      const table = this.tables()[tableIdx];
-      return (
-        sum +
-        table.sections.reduce((subtotal, section) => {
-          const totalRow = section.find((r) => r.type === RowType.TOTAL);
-          return subtotal + this.parseCellValue(totalRow?.data[colIndex] || 0);
-        }, 0)
-      );
+      const table = this.tables[tableIdx];
+      return sum + table.sections.reduce((subtotal, section) => {
+        const totalRow = section.find(r => r.type === RowType.TOTAL);
+        return subtotal + this.parseCellValue(totalRow?.data[colIndex] || 0);
+      }, 0);
     }, 0);
   }
 
@@ -458,106 +472,123 @@ export class TableDinamicComponent {
     tableIndex: number,
     sectionIndex: number,
     colIndex: number,
-    rowIndex: number
+    totalRowIndex: number
   ): number {
-    return this.tables()
-      [tableIndex].sections[sectionIndex].slice(0, rowIndex)
-      .filter((r) => r.type === RowType.NORMAL)
+    // Suma de filas "NORMAL" por encima de la fila "TOTAL" o "SUBTOTAL"
+    return this.tables[tableIndex].sections[sectionIndex]
+      .slice(0, totalRowIndex)
+      .filter(r => r.type === RowType.NORMAL)
       .reduce((sum, r) => sum + this.parseCellValue(r.data[colIndex]), 0);
   }
 
   private parseCellValue(value: CellValue): number {
-    return typeof value === 'number' ? value : parseFloat(value) || 0;
+    return (typeof value === 'number')
+      ? value
+      : parseFloat(value) || 0;
   }
 
   private updateGlobalTotal(tableIndex: number): void {
-    this.tables.update((tables) =>
-      tables.map((table, index) =>
-        index === tableIndex
-          ? { ...table, globalTotalRow: this.calculateGlobalTotal(table) }
-          : table
-      )
-    );
+    const table = this.tables[tableIndex];
+    table.globalTotalRow.data = this.columns.map((col, colIndex) => {
+      if (col.type === ColumnType.NUMBER || col.type === ColumnType.CUSTOM_SUM) {
+        // Suma de TOTAl de cada sección
+        return table.sections.reduce((sum, section) => {
+          const totalRow = section.find(r => r.type === RowType.TOTAL);
+          return sum + this.parseCellValue(totalRow?.data[colIndex] || 0);
+        }, 0);
+      }
+      return '';
+    });
   }
 
-  // Generación de HTML
+  // -----------------------------------------
+  //      Generar tabla unificada (HTML)
+  // -----------------------------------------
   generateUnifiedTable(): SafeHtml {
     let html = `
       <table class="table table-bordered">
         <thead>
           <tr>
-            ${this.columns()
-              .map((col) => `<th>${col.title}</th>`)
-              .join('')}
+            ${this.columns.map(col => `<th>${col.title}</th>`).join('')}
           </tr>
         </thead>
-        <tbody>`;
-
-    this.tables().forEach((table) => {
-      table.sections.forEach((section) => {
+        <tbody>
+    `;
+  
+    this.tables.forEach((tabla) => {
+      tabla.sections.forEach((section) => {
         section.forEach((row) => {
           if (row.type === RowType.SECTION_TITLE) {
             html += `
               <tr>
-                <td colspan="${this.columns().length}" 
+                <td colspan="${this.columns.length}"
                     style="background-color: #dee2e6; font-weight: bold; text-align: start;">
                   ${row.data[0]}
                 </td>
-              </tr>`;
+              </tr>
+            `;
           } else {
-            html += '<tr>';
-            row.data.forEach((cell, colIndex) => {
-              const colType = this.columns()[colIndex]?.type;
-              const align = [ColumnType.NUMBER, ColumnType.CUSTOM_SUM].includes(
-                colType
-              )
-                ? 'right'
-                : 'left';
-              const style = `text-align: ${align}; ${this.getRowStyle(
-                row.type
-              )}`;
-              html += `<td style="${style}">${cell}</td>`;
-            });
-            html += '</tr>';
+            const rowStyle = this.getRowStyle(row.type);
+            html += `<tr>`;
+            html += row.data.map((cell, colIndex) => {
+              const column = this.columns[colIndex] || { type: ColumnType.TEXT };
+              let cellValue = cell;
+  
+              // Si la columna es SELECT, mostrar el código en vez del ID
+              if (column.type === ColumnType.SELECT) {
+                cellValue = this.getSelectValue(column, cell as number);
+              }
+  
+              const alignStyle = (column.type === ColumnType.NUMBER || column.type === ColumnType.CUSTOM_SUM)
+                ? 'text-align: right;'
+                : 'text-align: left;';
+  
+              return `<td style="${alignStyle} ${rowStyle}">${cellValue}</td>`;
+            }).join('');
+            html += `</tr>`;
           }
         });
       });
-
-      if (table.showGlobalTotal) {
-        html += '<tr>';
-        table.globalTotalRow.data.forEach((cell, colIndex) => {
-          const colType = this.columns()[colIndex]?.type;
-          const align = [ColumnType.NUMBER, ColumnType.CUSTOM_SUM].includes(
-            colType
-          )
-            ? 'right'
-            : 'left';
-          html += `<td style="text-align: ${align}; background-color: #343a40; color: white;">
-            ${cell}
-          </td>`;
-        });
-        html += '</tr>';
-      }
     });
-
-    html += '</tbody></table>';
+  
+    html += `</tbody></table>`;
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
+  
+  getSelectValue(col: Column, id: number | null): string {
+    if (col.type !== ColumnType.SELECT || !col.options) return '';
+    if (id === null) return 'Sin seleccionar'; // Muestra algo si está vacío
+    const option = col.options.find(opt => opt.id === +id);
+    return option ? option.code : ''; // Retorna el código o un mensaje por defecto
+  }
+  
 
-  private getRowStyle(type: RowType): string {
+  getRowStyle(type: RowType): string {
     switch (type) {
-      case RowType.SUBTOTAL:
-        return 'background-color: #cce5ff;';
-      case RowType.TOTAL:
-        return 'background-color: #ffeeba;';
-      default:
-        return '';
+      case RowType.SUBTOTAL: return 'background-color: #cce5ff;';
+      case RowType.TOTAL:    return 'background-color: #ffeeba;';
+      case RowType.NORMAL:   return 'background-color: #f8f9fa;';
+      default:               return '';
     }
   }
 
-  // Utilidades
+  // -----------------------------------------
+  //        trackBy / Misc
+  // -----------------------------------------
+  trackByColumn(index: number, col: Column): number {
+    return index;
+  }
+
+  trackByTable(index: number, table: Table): string {
+    // Ojo: Si quisieras usar "table.name" como ID, puedes hacerlo
+    return `${index}-${table.sections.length}`;
+  }
+
+  // -----------------------------------------
+  //        Botón "submit"
+  // -----------------------------------------
   submit(): void {
-    console.log('Tables:', JSON.stringify(this.tables(), null, 2));
-    console.log('Columns:', JSON.stringify(this.columns(), null, 2));
+    console.log('Tables:', JSON.stringify(this.tables, null, 2));
+    console.log('Columns:', JSON.stringify(this.columns, null, 2));
   }
 }

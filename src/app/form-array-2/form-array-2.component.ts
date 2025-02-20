@@ -68,5 +68,9 @@ export class FormArray2Component {
     const posts = this.form.get('posts') as FormArray;
     return (posts.at(index).get('items') as FormArray).controls;
   }
+
+  submit() {
+    console.log(this.form.value);
+  }
   
 }
